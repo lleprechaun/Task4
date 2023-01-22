@@ -141,7 +141,7 @@ nav {
 }
 .nav-menu {
     height: 100%;
-    display: flex; 
+    display: flex;
     list-style-type: none;
 }
 .nav-menu a {
@@ -191,7 +191,7 @@ header {
     height: calc(100vh - 60px);
     display: grid;
     place-items: center;
-    background: linear-gradient(rgba(245, 13, 13, 0.2), rgba(245, 13, 13, 0.2)), url('../images/guitars.jpg') center/cover no-repeat;   
+    background: linear-gradient(rgba(245, 13, 13, 0.2), rgba(245, 13, 13, 0.2)), url('../images/guitars.jpg') center/cover no-repeat;
 }
 .intro {
     max-width: 600px;
@@ -250,7 +250,7 @@ h1 {
     box-shadow: var(--main-shadow);
 }
 .section h2 {
-    margin-bottom: 3rem; 
+    margin-bottom: 3rem;
     text-align: center;
     font-size: 2rem;
     text-transform: capitalize;
@@ -261,7 +261,7 @@ h1 {
     padding-bottom: 0.2rem;
     border-bottom: 3px solid var(--main-red);
 }
-.filter-btns {  
+.filter-btns {
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
@@ -392,7 +392,7 @@ h1 {
     color: var(--main-white);
     opacity: 0.8;
     font-size: 1.2rem;
-} 
+}
 .slider {
     position: relative;
     height: 60vh;
@@ -400,7 +400,7 @@ h1 {
     border: 3px solid var(--main-red);
     border-radius: 0.2rem;
     overflow: hidden;
-    background-color: var(--main-blue); 
+    background-color: var(--main-blue);
     box-shadow: var(--main-shadow);
     user-select: none;
 }
@@ -464,7 +464,7 @@ h1 {
 .circle:nth-child(3n) {
     background-color: var(--main-orange);
     animation-delay: 0.5s;
-}  
+}
 @keyframes scaling {
     0%, 100% {
       transform: scale(0);
@@ -642,6 +642,14 @@ h1 {
     transform: translateX(100%);
     transition: var(--ease-transition);
 }
+.carts-container {
+    max-width: 1200px;
+    width: 90vw;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-gap: 2rem;
+    margin: 0 auto;
+}
 .show .cart {
     transform: translateX(0);
 }
@@ -741,7 +749,7 @@ h1 {
     content: '';
     position: absolute;
     bottom: -2px;
-    left: -4px;    
+    left: -4px;
     width: calc(100% + 8px);
     height: 0;
     background-color: var(--main-blue);
@@ -767,6 +775,39 @@ h1 {
     width: 1.5rem;
     margin: 0.25rem 0;
     line-height: 1;
+}
+
+/*********************************************** CART - MAIN ***********************************************/
+
+.cart-slider{
+    height: 45vh;
+    margin: 3rem 0;
+    background-color: var(--main-white);
+    display: none;
+}
+.carts-main{
+    max-width: 1200px;
+    width: 75vw;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+}
+.cart-main{
+    position: absolute;
+    width: 33%;
+    object-fit: cover;
+    opacity: 0.9;
+    transition: var(--ease-transition-2);
+}
+.carts-main img{
+    width: 75%;
+    margin: auto;
+}
+.left-cart-btn{
+    color: var(--main-black);
+}
+.right-cart-btn{
+    color: var(--main-black);
 }
 
 /*********************************************** FOOTER ***********************************************/

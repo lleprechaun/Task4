@@ -11,6 +11,8 @@ const preloader = document.querySelector(".preloader");
 const cartOverlay = document.querySelector('.cart-overlay');
 const cartContent = document.querySelector('.cart-items');
 const cartBtn = document.querySelector('.cart-btn');
+const cartsArea = document.querySelector('.carts-container');
+const cartSlider = document.querySelector('.cart-slider')
 const closeCartBtn = document.querySelector('.close-cart-btn');
 const clearCartBtn = document.querySelector('.clear-cart-btn');
 // product-info
@@ -32,8 +34,14 @@ let cartItems;
 class Products {
 
     async getProducts () {
-        // Contentful data 
-        const response = await fetch('https://apiinterns.osora.ru/data/data.json');
+        // Contentful data
+        const credentials = btoa("Dev:qdprivate");
+        const response = await fetch('https://apiinterns.osora.ru/data/data.json', {
+            headers: {
+                'Authorization': `Basic ${credentials}`,
+                'Access-Control-Allow-Origin': 'no-cors'
+            }
+        });
         const result = await response.json();
         // Get products from data
         const products = result.items.map(item => {
@@ -41,12 +49,12 @@ class Products {
             const images = item.fields.images.map(image => 'https:' + image.fields.file.url);
             return {id, brand, title, price, description, images};
         });
-        // Sort products and return     
+        // Sort products and return
         return products.sort((a, b) => {
             if (a.brand > b.brand) return 1;
             if (a.brand < b.brand) return -1;
             return 0;
-        });  
+        });
     }
 
 }
@@ -117,7 +125,7 @@ class UI {
             const inCart = cartItems.find(item => item.id === button.dataset.id);
             if (inCart) {
                 button.textContent = 'in cart';
-                button.disabled = true; 
+                button.disabled = true;
             }
             // Assign handlers to product buttons
             button.addEventListener('click', () => {
@@ -140,6 +148,16 @@ class UI {
         cartItems.forEach(item => {
             this.addCartItem(item);
         });
+        cartSlider.style.display = 'block';
+        cartsArea.innerHTML = cartItems.map(product => {
+            return `<article class="product cart-main" data-brand="${product.brand}">
+                            <div class="product-image-wrapper cart-image-wrapper">
+                                <img src="${product.images[0]}" alt="${product.title}">  
+                            </div>
+                            <h3>${product.title}</h3>
+                            <h4>$${product.price}</h4>
+                        </article>`;
+        }).join('');
         this.checkEmptyCart();
         this.defineCartTotal();
     }
@@ -147,11 +165,17 @@ class UI {
     checkEmptyCart () {
         if (!cartItems.length) {
             cartContent.innerHTML = '<div class="empty-cart">No items...</div>';
+            const cartMain = document.querySelector('.content-wrapper');
+            if(cartMain.closest('#cart'))
+            {
+                cartMain.innerHTML = '<div class="empty-cart">No items...</div>';
+            }
+            cartSlider.style.display = 'none';
             return;
-        } 
+        }
         const div = document.querySelector('.empty-cart');
         if (div) div.remove();
-    } 
+    }
 
     addCartItem (cartItem) {
         const article = document.createElement('article');
@@ -182,11 +206,41 @@ class UI {
         Storage.saveCartItems(cartItems);
     }
 
+    setCartSlider() {
+        const leftSliderBtn = document.querySelector('.left-cart-btn');
+        const rightSliderBtn = document.querySelector('.right-cart-btn');
+        const slides = document.querySelectorAll('.cart-main');
+        console.log(slides)
+        let slideStep = 0;
+        leftSliderBtn.style.visibility = 'hidden';
+        if(slides.length / 3 <= 1) rightSliderBtn.style.visibility = 'hidden';
+
+        // Set slides positions
+        slides.forEach((slide, index) => slide.style.left = `${index * 33}%`);
+
+        // Slider buttons listeners
+        rightSliderBtn.addEventListener('click', () => {
+            slideStep++;
+            leftSliderBtn.style.visibility = 'visible';
+            if (slideStep > slides.length / 3 + (slides.length % 3 !== 0 ? 1 : 0) - 1) {
+                slideStep = 0;
+                leftSliderBtn.style.visibility = 'hidden';
+            }
+            slides.forEach(slide => slide.style.transform = `translateX(-${slideStep * 300}%)`);
+        });
+
+        leftSliderBtn.addEventListener('click', () => {
+            slideStep--;
+            if (slideStep === 0) leftSliderBtn.style.visibility = 'hidden';
+            slides.forEach(slide => slide.style.transform = `translateX(-${slideStep * 300}%)`);
+        });
+    }
+
     restoreProductBtn (id) {
         const buttons = [...document.querySelectorAll('.product-btn')];
         const button = buttons.find(button => button.dataset.id === id);
         button.innerHTML = '<i class="fas fa-shopping-cart"></i> Add to cart';
-        button.disabled = false;          
+        button.disabled = false;
     }
 
     defineCartTotal () {
@@ -221,11 +275,11 @@ class UI {
             if (cartItem.amount === 0) {
                 button.parentElement.parentElement.remove();
                 this.removeCartItem(button.dataset.id);
-                return;                
-            }             
+                return;
+            }
             button.previousElementSibling.textContent = cartItem.amount;
             this.defineCartTotal();
-            Storage.saveCartItems(cartItems);         
+            Storage.saveCartItems(cartItems);
         }
     }
 
@@ -240,12 +294,14 @@ class UI {
         clearCartBtn.addEventListener('click', () => {
             cartItems.forEach(item => this.removeCartItem(item.id));
         });
-        cartContent.addEventListener('click', this.setCartItemBtns.bind(this));      
+        cartContent.addEventListener('click', this.setCartItemBtns.bind(this));
         // Listeners for navigation
         menuToggleBtn.addEventListener('click', this.setMenuToggle);
         sctollLinks.forEach(link => link.addEventListener('click', this.setScrollingLinks.bind(this)));
+
+        this.setCartSlider();
         // Launch product info
-        this.setProductInfo();  
+        this.setProductInfo();
         // Launch slider
         this.setSlider();
         // Set year
@@ -257,7 +313,7 @@ class UI {
         if (menuToggleBtn.classList.contains('anim')) {
             let menuHeight = 0;
             navMenu.querySelectorAll('a').forEach(elem => menuHeight += elem.offsetHeight);
-            navMenu.style.height = `${menuHeight}px`;                
+            navMenu.style.height = `${menuHeight}px`;
         } else {
             navMenu.style.height = '';
         }
@@ -265,7 +321,7 @@ class UI {
 
     setScrollingLinks (event) {
         event.preventDefault();
-        if (menuToggleBtn.classList.contains('anim')) this.setMenuToggle();        
+        if (menuToggleBtn.classList.contains('anim')) this.setMenuToggle();
         const id = event.target.getAttribute('href').slice(1);
         const elem = document.getElementById(id);
         const position = elem.offsetTop - navBar.offsetHeight;
@@ -308,7 +364,7 @@ class UI {
 
     setProductInfo () {
         let step = 0;
-        // Set product info listener 
+        // Set product info listener
         productInfo.addEventListener('click', event => {
             if (event.target.closest('.info-close-btn')) {
                 document.body.style.overflow = '';
@@ -347,16 +403,16 @@ class UI {
             if (index === step) image.style.opacity = '1';
             else image.style.opacity = '';
         });
-    }    
+    }
 
     setSlider () {
         const leftSliderBtn = document.querySelector('.left-slider-btn');
         const rightSliderBtn = document.querySelector('.right-slider-btn');
         const slides = document.querySelectorAll('.slide');
         let slideStep = 0;
-        // Set slides positiones
+        // Set slides positions
         slides.forEach((slide, index) => slide.style.left = `${index * 100}%`);
-        // Slider buttons listeners 
+        // Slider buttons listeners
         rightSliderBtn.addEventListener('click', () => {
             slideStep++;
             if (slideStep > slides.length - 1) slideStep = 0;
@@ -366,11 +422,11 @@ class UI {
             slideStep--;
             if (slideStep < 0) slideStep = slides.length - 1;
             slides.forEach(slide => slide.style.transform = `translateX(-${slideStep * 100}%)`);
-        });        
+        });
     }
 
     setYear () {
-        const year = new Date().getFullYear();
+        const year = new Date().getFullYear().toString();
         document.querySelector('.date').textContent = year;
     }
 
